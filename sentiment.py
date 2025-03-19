@@ -1,169 +1,109 @@
-dates={}
-datesn={}
-textp={}
-textn={}
-names={}
-namesn={}
-times={}
-dicp={}
-hour={}
-hourn={}
-times={}
-minute={}
-timesn={}
-minuten={}
-dicn={}
-words=[]
-i=0
+# sentiment.py
+import pandas as pd
+from collections import defaultdict
+import re
 
+def parse_chat(file_path):
+    dates, textp, names, times, hour, minute = defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list)
+    words, dicp = [], defaultdict(int)
+    i = 0
 
-#split data
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
 
-for line in open('pat.txt'):
-	if(line.split('-') == [line] or line.split(':')== [line]):
-		continue
-	dates[i], textp[i] = line.split('-',1)
-	names[i], textp[i] = textp[i].split(':',1)
-	dates[i], times[i] = dates[i].split(', ',1)
-	hour[i], minute[i] = times[i].split(':',1)
-	i = i+1
+            try:
+                match = re.match(r'\[(.*?)\]', line)
+                if not match:
+                    continue
+                timestamp = match.group(1)  # e.g., "01/11/24, 1:20:35 AM"
+                rest = line[len(match.group(0)):].strip()
 
+                if ': ' not in rest:
+                    continue
+                name, message = rest.split(': ', 1)
 
+                if "end-to-end encrypted" in message.lower():
+                    continue
 
+                date, time = timestamp.split(', ', 1)
+                h, m = time.split(':', 1)
+                h = h.strip()  # Hour (e.g., "1")
 
-for text in textp:
-	for word in textp[text].split():
-		if word.lower() in dicp:
-			dicp[word.lower()] += 1
-		else:
-			dicp[word.lower()] = 1
-			words.append(word.lower())
+                m_parts = m.split(':')
+                if len(m_parts) < 2:
+                    continue
+                min_part = m_parts[0].strip()
+                sec_am_pm = m_parts[1].strip()
 
+                sec_am_pm = re.split(r'[\s\u202f]+', sec_am_pm)
+                if len(sec_am_pm) < 2:
+                    continue
+                sec = sec_am_pm[0].strip()
+                am_pm = sec_am_pm[1].strip()
 
-nm=0
+                h = f"{h} {am_pm}"
 
-for w in sorted(dicp,key=dicp.get,reverse=True):
-	if(w!="<media" and w!="omitted>"):
-		print(w,dicp[w])
+                dates[i] = date
+                textp[i] = message
+                names[i] = name
+                times[i] = f"{h}:{min_part}"
+                hour[i] = h
+                minute[i] = min_part
+                i += 1
 
-threadsp={}
-for name in names:
-	if names[name] in threadsp:
-		threadsp[names[name]] +=1
-	else:
-		threadsp[names[name]] = 1
-fdatep={}
-def get_ke(val): 
-    for key, value in fdatep.items(): 
-         if val == value: 
-             return key
-for i in dates:
-	if dates[i] in fdatep:
-		fdatep[dates[i]]+=1
-	else:
-		fdatep[dates[i]]=1
-print ("Maximum Conversation on"),
-print get_ke(max(fdatep.values())),":-", max(fdatep.values()), "threads"
-'''
-for w in (dicp):
-	print w	
-	if w=="<media":
-		nm+=1
-print "Media Shared", nm ,"times."
-'''
-print("-----------------------------------------------------------------------------")
-print("/////////////////////////////////////////////////////////////////////////////")
-print("-----------------------------------------------------------------------------")
+            except (ValueError, IndexError) as e:
+                print(f"Skipping malformed line in parse_chat: {line}")
+                continue
 
-for line in open('khn.txt'):
-	if(line.split('-') == [line] or line.split(':')== [line]):
-		continue
-	datesn[i], textn[i] = line.split('-',1)
-	namesn[i], textn[i] = textn[i].split(':',1)
-	datesn[i], timesn[i] = datesn[i].split(', ',1)
-	hourn[i], minuten[i] = timesn[i].split(':',1)
-	i = i+1
+    for text in textp:
+        for word in textp[text].split():
+            word_lower = word.lower()
+            dicp[word_lower] += 1
+            if word_lower not in words:
+                words.append(word_lower)
 
-for text in textn:
-	for word in textn[text].split():
-		if word.lower() in dicn:
-			dicn[word.lower()] += 1
-		else:
-			dicn[word.lower()] = 1
-			words.append(word.lower())
+    df = pd.DataFrame({
+        'date': list(dates.values()),
+        'time': list(times.values()),
+        'hour': list(hour.values()),
+        'minute': list(minute.values()),
+        'name': list(names.values()),
+        'text': list(textp.values())
+    })
+    df['datetime'] = pd.to_datetime(df['date'] + ' ' + df['time'], errors='coerce')
+    return df, dicp, words
 
-for w in sorted(dicn,key=dicn.get,reverse=True):
-	print(w,dicn[w])
+def get_word_frequency(dicp):
+    return {w: dicp[w] for w in sorted(dicp, key=dicp.get, reverse=True) if w not in ["<media", "omitted>"]}
 
-'''
-pm=0
-for w in dicp:
-	if w=="<media":
-		pm+=1
-		print w
+def get_user_threads(names):
+    threadsp = defaultdict(int)
+    for i in names:
+        threadsp[names[i]] += 1
+    return threadsp
 
-print "Media Shared", pm ,"times."
-'''
-print("-----------------------------------------------------------------------------")
-threads={}
-for name in namesn:
-	if namesn[name] in threads:
-		threads[namesn[name]] +=1
-	else:
-		threads[namesn[name]] = 1
+def get_date_frequency(dates):
+    fdatep = defaultdict(int)
+    for i in dates:
+        fdatep[dates[i]] += 1
+    return fdatep
 
-print(threads)
-print("-----------------------------------------------------------------------------")
-hours={}
-for h in hour:
-	if hour[h] in hours:
-		hours[hour[h]] += 1
-	else:
-		hours[hour[h]] = 1
-def get_k(val): 
-    for key, value in hours.items(): 
-         if val == value: 
-             return key
-print "Peak time", get_k(max(hours.values())),"00 hours ", max(hours.values()), "threads"
+def get_hourly_activity(hour):
+    hours = defaultdict(int)
+    for h in hour:
+        hours[hour[h]] += 1
+    return hours
 
-fdate={}
-def get_key(val): 
-    for key, value in fdate.items(): 
-         if val == value: 
-             return key
-for i in datesn:
-	if datesn[i] in fdate:
-		fdate[datesn[i]]+=1
-	else:
-		fdate[datesn[i]]=1
-print ("Maximum Conversation on"),
-print get_key(max(fdate.values())),":-", max(fdate.values()), "threads"
-test = raw_input();
-c=0
-q=0
-p=0
-
-for word in test.split():
-	if word.lower() in dicp:
-		p=dicp[word]
-		
-	else:
-		p=0
-	#print p
-	if word.lower() in dicn:
-		q=dicn[word]
-	else:
-		q=0
-	#print q
-	if(p>q):
-		c+=1
-	elif(p<q):
-		c-=1
-	else:
-		c=c
-	#print c
-
-if(c<0):
-	print ("Negative")
-else:
-	print("Positive")
+def simple_sentiment(text, dicp, dicn):
+    c = 0
+    for word in text.split():
+        p = dicp.get(word.lower(), 0)
+        q = dicn.get(word.lower(), 0)
+        if p > q:
+            c += 1
+        elif p < q:
+            c -= 1
+    return "Positive" if c >= 0 else "Negative"
