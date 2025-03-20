@@ -57,9 +57,8 @@ def main():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Analysis 📊"):
-               st.page_link("Pages/analysis.py", label="Page 1", icon="1️⃣")  # Revert to st.switch_page
+                st.switch_page("pages/analysis.py")  # Fixed the case: "Pages" to "pages"
 
-        # Display summarized suggestions directly
         st.subheader("Suggestions 💁")
         if client and st.session_state['df'] is not None:
             chat_text = " ".join(st.session_state['df']["text"].dropna())
