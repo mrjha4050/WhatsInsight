@@ -8,6 +8,7 @@ from groq import Groq
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
@@ -35,11 +36,13 @@ else:
     plt.axis('off')
     st.pyplot(plt)
     
+    # Hourly Activity
     st.subheader("Hourly Activity")
     hours = get_hourly_activity(df['hour'].to_dict())
     fig = px.bar(x=list(hours.keys()), y=list(hours.values()), labels={'x': 'Hour', 'y': 'Messages'})
     st.plotly_chart(fig)
     
+    # Main Topics using Groq
     st.subheader("Main Topics Discussed")
     try:
         topics_response = client.chat.completions.create(

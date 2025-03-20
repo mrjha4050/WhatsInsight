@@ -10,10 +10,12 @@ import re
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+# Initialize Groq client
 client = Groq(api_key=GROQ_API_KEY)
 
 st.title("User Profiles")
  
+
 
 if 'df' not in st.session_state:
     st.warning("Please upload a file on the Home page.")
