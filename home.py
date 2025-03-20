@@ -5,9 +5,11 @@ from groq import Groq
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
+# Initialize Groq client safely
 if not GROQ_API_KEY:
     st.error("GROQ_API_KEY is not set. Please add it to your environment.")
     client = None
@@ -52,9 +54,12 @@ def main():
         st.write(f"**Total Messages:** {st.session_state['analysis']['total_messages']}")
         st.write("**User Word Counts:**", st.session_state['analysis']['user_word_counts'])
 
-        if st.button("Analysis 📊"):
-            st.page_link("pages/analysis.py", label="Page 1", icon="1️⃣")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Analysis 📊"):
+                st.switch_page("pages/analysis.py")  # Revert to st.switch_page
 
+        # Display summarized suggestions directly
         st.subheader("Suggestions 💁")
         if client and st.session_state['df'] is not None:
             chat_text = " ".join(st.session_state['df']["text"].dropna())
