@@ -57,7 +57,7 @@ def main():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Analysis 📊"):
-                st.switch_page("pages/analysis.py")  # Revert to st.switch_page
+                st.switch_page("Pages/analysis.py")  # Revert to st.switch_page
 
         # Display summarized suggestions directly
         st.subheader("Suggestions 💁")
