@@ -106,4 +106,4 @@ def simple_sentiment(text, dicp, dicn):
             c += 1
         elif p < q:
             c -= 1
-    return "Positive" if c >= 0 else "Negative"
+    return c  # Return the numerical score instead of a string
