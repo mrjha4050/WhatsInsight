@@ -55,7 +55,7 @@ def main():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Analysis 📊"):
-                st.switch_page("pages/analysis.py")
+                st.page_link("pages/analysis.py", label="Page 1", icon="1️⃣")
 
         # Display summarized suggestions directly
         st.subheader("Suggestions 💁")
