@@ -1,6 +1,22 @@
 import streamlit as st
 from sentiment import parse_chat
 from Whatsapp_analysis import analyze_chat
+from groq import Groq
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    st.error("GROQ_API_KEY is not set. Please add it to your environment.")
+    client = None
+else:
+    try:
+        client = Groq(api_key=GROQ_API_KEY)
+    except Exception as e:
+        st.error(f"Failed to initialize Groq client: {e}")
+        client = None
 
 if 'df' not in st.session_state:
     st.session_state['df'] = None
@@ -40,10 +56,27 @@ def main():
         with col1:
             if st.button("Analysis 📊"):
                 st.switch_page("pages/analysis.py")
-        
-        with col2:
-            if st.button("Suggestion 💁"):
-                st.switch_page("pages/suggestions.py")
+
+        # Display summarized suggestions directly
+        st.subheader("Suggestions 💁")
+        if client and st.session_state['df'] is not None:
+            chat_text = " ".join(st.session_state['df']["text"].dropna())
+            try:
+                suggestion_response = client.chat.completions.create(
+                    model="llama3-70b-8192",
+                    messages=[
+                        {"role": "system", "content": "Provide suggestions based on this chat conversation."},
+                        {"role": "user", "content": f"Chat: {chat_text[:2000]}"},
+                    ],
+                    max_tokens=200,
+                )
+                suggestions = suggestion_response.choices[0].message.content
+                st.write(suggestions)
+            except Exception as e:
+                st.error(f"Error getting suggestions: {e}")
+                st.write("Unable to get suggestions at this time.")
+        else:
+            st.write("Suggestions unavailable: Groq API key missing or chat not loaded.")
 
 if __name__ == "__main__":
     main()
