@@ -52,12 +52,9 @@ def main():
         st.write(f"**Total Messages:** {st.session_state['analysis']['total_messages']}")
         st.write("**User Word Counts:**", st.session_state['analysis']['user_word_counts'])
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Analysis 📊"):
-                st.page_link("pages/analysis.py", label="Page 1", icon="1️⃣")
+        if st.button("Analysis 📊"):
+            st.page_link("pages/analysis.py", label="Page 1", icon="1️⃣")
 
-        # Display summarized suggestions directly
         st.subheader("Suggestions 💁")
         if client and st.session_state['df'] is not None:
             chat_text = " ".join(st.session_state['df']["text"].dropna())
