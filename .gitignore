@@ -24,4 +24,3 @@ instance
 .pytest_cache
 _chat.txt
 temp_chat.txt
-.env
