@@ -2,7 +2,6 @@ import streamlit as st
 from sentiment import parse_chat
 from Whatsapp_analysis import analyze_chat
 
-# Initialize session state variables if they don't exist
 if 'df' not in st.session_state:
     st.session_state['df'] = None
 if 'dicp' not in st.session_state:
@@ -13,8 +12,8 @@ if 'chat_loaded' not in st.session_state:
     st.session_state['chat_loaded'] = False
 
 def main():
-    st.title("WhatsApp Analyzer")
-    st.write("Upload your chat file below:")
+    st.title("WhatsApp Analyzer 🕵️‍♂️")
+    st.write("Upload your chat file below 📁:")
 
     uploaded_file = st.file_uploader("Choose a WhatsApp chat file (.txt)", type="txt")
 
