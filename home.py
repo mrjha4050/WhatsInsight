@@ -58,7 +58,9 @@ def summarize_chat(chat_text, max_chars=8000):
 
 def main():
     st.title("WhatsApp Analyzer 🕵️‍♂️")
-    st.write("Upload your chat file below 📁:")
+    st.write("For getting the chat data, go to person profile and click the export chat button.")
+
+    st.write("Upload a WhatsApp chat file (.txt) to get started 📁:-")
 
     uploaded_file = st.file_uploader("Choose a WhatsApp chat file (.txt)", type="txt")
 
