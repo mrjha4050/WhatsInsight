@@ -24,7 +24,6 @@ else:
 
 st.title("Chat Analysis 📉📊")
 
-# Check session state
 if "df" not in st.session_state or "dicp" not in st.session_state:
     st.warning("Please upload a file on the Home page.")
     st.stop()

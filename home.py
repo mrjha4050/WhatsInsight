@@ -1,9 +1,10 @@
 import streamlit as st
-from sentiment import parse_chat
+from sentiment import parse_chat, get_word_frequency, get_hourly_activity
 from Whatsapp_analysis import analyze_chat
 from groq import Groq
 import os
 from dotenv import load_dotenv
+import plotly.express as px
 
 # Load environment variables
 load_dotenv()
@@ -20,6 +21,7 @@ else:
         st.error(f"Failed to initialize Groq client: {e}")
         client = None
 
+# Initialize session state variables
 if 'df' not in st.session_state:
     st.session_state['df'] = None
 if 'dicp' not in st.session_state:
@@ -57,16 +59,40 @@ def main():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Analysis 📊"):
-                st.switch_page("pages/analysis.py")  # Fixed the case: "Pages" to "pages"
+                st.switch_page("pages/analysis.py")
+        with col2:
+            if st.button("Quick Analytics 📈"):
+                st.session_state['show_analytics'] = True
+
+        # Analytics Section
+        if 'show_analytics' in st.session_state and st.session_state['show_analytics']:
+            st.subheader("Quick Analytics 📉")
+            
+            st.write("**Most Used Words**")
+            word_freq = get_word_frequency(st.session_state['dicp'])
+            st.write(list(word_freq.items())[:10])
+
+            st.write("**Hourly Activity**")
+            hours = get_hourly_activity(st.session_state['df']["hour"].to_dict())
+            fig = px.bar(
+                x=list(hours.keys()),
+                y=list(hours.values()),
+                labels={"x": "Hour", "y": "Messages"},
+                width=600,  # Smaller width for the main page
+                height=300  # Smaller height for the main page
+            )
+            st.plotly_chart(fig)
 
         st.subheader("Suggestions 💁")
         if client and st.session_state['df'] is not None:
             chat_text = " ".join(st.session_state['df']["text"].dropna())
             try:
+                if len(chat_text) > 2000:
+                    st.warning("Chat text truncated to 2000 characters for suggestions.")
                 suggestion_response = client.chat.completions.create(
                     model="llama3-70b-8192",
                     messages=[
-                        {"role": "system", "content": "Provide suggestions based on this chat conversation."},
+                        {"role": "system", "content": "Provide suggestions based on this chat conversation and also at end show in short keywords."},
                         {"role": "user", "content": f"Chat: {chat_text[:2000]}"},
                     ],
                     max_tokens=200,
