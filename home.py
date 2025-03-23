@@ -42,7 +42,7 @@ def summarize_chat(chat_text, max_chars=8000):
     if client:
         try:
             summary_response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": "You are a summarization expert. Summarize the given chat conversation into a concise summary."},
                     {"role": "user", "content": f"Summarize this chat into {max_chars} characters or less: {chat_text[:16000]}"},
@@ -125,7 +125,7 @@ def main():
             if client:
                 try:
                     topics_response = client.chat.completions.create(
-                        model="llama3-70b-8192",
+                        model="llama-3.1-8b-instant",
                         messages=[
                             {
                                 "role": "system",
@@ -151,7 +151,7 @@ def main():
             if client:
                 try:
                     tone_response = client.chat.completions.create(
-                        model="llama3-70b-8192",
+                        model="llama-3.1-8b-instant",
                         messages=[
                             {
                                 "role": "system",
@@ -181,7 +181,7 @@ def main():
                 st.warning("Chat text was summarized to fit within the API limit for suggestions.")
             try:
                 suggestion_response = client.chat.completions.create(
-                    model="llama3-70b-8192",
+                    model="llama-3.1-8b-instant",
                     messages=[
                         {"role": "system", "content": "Provide suggestions based on this chat conversation and also at end show in short keywords."},
                         {"role": "user", "content": f"Chat: {processed_text}"},
