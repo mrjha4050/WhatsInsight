@@ -183,7 +183,7 @@ def main():
                 suggestion_response = client.chat.completions.create(
                     model="llama-3.1-8b-instant",
                     messages=[
-                        {"role": "system", "content": "Provide suggestions based on this chat conversation and also at end show in short keywords."},
+                        {"role": "system", "content": "Provide suggestions based on this chat conversation and also give in short how you can improve ."},
                         {"role": "user", "content": f"Chat: {processed_text}"},
                     ],
                     max_tokens=300,
